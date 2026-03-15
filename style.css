@@ -1,0 +1,27 @@
+body{
+margin:0;
+background:#0d0e12;
+color:white;
+font-family:Segoe UI;
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+padding:15px;
+background:#1e2025;
+border-bottom:1px solid #333;
+}
+
+#cy{
+flex:1;
+}
+
+#event-info{
+background:#25262b;
+padding:10px;
+border-left:3px solid #4dabf7;
+}

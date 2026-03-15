@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saureltia Network Test</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/layout-base/layout-base.js"></script>
+    <script src="https://unpkg.com/cose-base/cose-base.js"></script>
+    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+</head>
+
+<body>
+
+<header>
+    <h1>SAURELTIA NETWORK</h1>
+    <div id="event-info">Select event</div>
+</header>
+
+<div id="cy"></div>
+
+<script type="module">
+    // 모듈 임포트
+    import { SaureltiaEngine } from './js/saureltiaEngine.js'
+    import { GraphRenderer } from './js/graphRenderer.js'
+    import { InteractionController } from './js/interactionController.js'
+    import { PatternMiner } from './js/patternMiner.js'
+    import { TimeEngine } from './js/timeEngine.js'
+
+    // 실행 로직을 함수로 감싸 안전하게 호출
+    async function initSaureltia() {
+        try {
+            // 1. 엔진 초기화 및 데이터 로드
+            const engine = new SaureltiaEngine();
+            await engine.loadData("./data/events.json");
+
+            // 2. 렌더러 가동
+            const renderer = new GraphRenderer(engine);
+            const cy = renderer.render("cy");
+
+            // 3. 인터랙션 및 패턴 분석
+            if (cy) {
+                new InteractionController(cy, engine);
+
+                const miner = new PatternMiner(engine, cy);
+                const patterns = miner.mine();
+                miner.highlightPatterns(patterns);
+
+                // 타임라인 엔진 준비 (자동 실행하려면 아래 주석 해제)
+                const timeline = new TimeEngine(engine, cy);
+                // timeline.play(1500);
+                
+                console.log("Saureltia System: 가동 성공");
+            }
+        } catch (error) {
+            console.error("Saureltia 초기화 중 오류 발생:", error);
+            document.getElementById('event-info').innerText = "Error: Check Console (F12)";
+        }
+    }
+
+    // DOM이 준비된 후 실행
+    window.addEventListener('DOMContentLoaded', initSaureltia);
+</script>
+
+</body>
+</html>

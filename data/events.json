@@ -1,0 +1,48 @@
+{
+  "nodes": [
+    {
+      "id": "EVT-0001",
+      "label": "Reddit NVDA hype",
+      "ticker": "NVDA",
+      "sentiment": "bullish",
+      "confidence": 0.71,
+      "time": "2026-03-15",
+      "stat": "Alive",
+      "desc": "Reddit community strong optimism"
+    },
+    {
+      "id": "EVT-0002",
+      "label": "NVDA price spike",
+      "ticker": "NVDA",
+      "sentiment": "bullish",
+      "confidence": 0.82,
+      "time": "2026-03-16",
+      "stat": "Alive",
+      "desc": "Price surge after hype"
+    },
+    {
+      "id": "EVT-0003",
+      "label": "AI sector rally",
+      "ticker": "SMH",
+      "sentiment": "bullish",
+      "confidence": 0.63,
+      "time": "2026-03-17",
+      "stat": "Alive",
+      "desc": "Semiconductor ETF rally"
+    }
+  ],
+  "edges": [
+    {
+      "from": "EVT-0001",
+      "to": "EVT-0002",
+      "type": "CAUSE",
+      "strength": 0.6
+    },
+    {
+      "from": "EVT-0002",
+      "to": "EVT-0003",
+      "type": "PRECURSOR",
+      "strength": 0.5
+    }
+  ]
+}
