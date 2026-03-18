@@ -1,0 +1,57 @@
+{
+  "nodes": [
+    {
+      "id": "EVT-001",
+      "label": "NVDA bullish earnings",
+      "ticker": "NVDA",
+      "sentiment": "bullish",
+      "confidence": 0.9,
+      "time": "2026-03-17T10:00:00"
+    },
+    {
+      "id": "EVT-002",
+      "label": "AI sector rally",
+      "ticker": "SMH",
+      "sentiment": "bullish",
+      "confidence": 0.8,
+      "time": "2026-03-17T12:00:00"
+    },
+    {
+      "id": "EVT-003",
+      "label": "Overheat warning",
+      "ticker": "NVDA",
+      "sentiment": "bearish",
+      "confidence": 0.85,
+      "time": "2026-03-18T09:00:00"
+    },
+    {
+      "id": "EVT-004",
+      "label": "Market correction",
+      "ticker": "QQQ",
+      "sentiment": "bearish",
+      "confidence": 0.75,
+      "time": "2026-03-18T11:00:00"
+    }
+  ],
+  "edges": [
+    {
+      "from": "EVT-001",
+      "to": "EVT-002",
+      "type": "CAUSE",
+      "strength": 0.8
+    },
+    {
+      "from": "EVT-002",
+      "to": "EVT-003",
+      "type": "PRECURSOR",
+      "strength": 0.7
+    },
+    {
+      "from": "EVT-003",
+      "to": "EVT-004",
+      "type": "CAUSE",
+      "strength": 0.9
+    }
+  ]
+}
+

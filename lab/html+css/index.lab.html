@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saureltia LAB</title>
+
+
+  <link rel="stylesheet" href="./style.lab.css" />
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>SAURELTIA LAB</h1>
+    <div id="info-panel">노드를 선택하면 사건 데이터가 출력됩니다.</div>
+  </header>
+
+
+  <div id="controls">
+  <button id="btn-pattern">Detect Pattern</button>
+  <button id="btn-play">Play Timeline</button>
+  <button id="btn-event">Generate Event</button>
+  <button id="btn-relayout">Re-layout</button>
+  <button id="btn-feedback-good">Feedback +</button>
+  <button id="btn-feedback-bad">Feedback -</button>
+  <button id="btn-reset-lab">Reset Lab</button>
+</div>
+
+  
+
+
+  <main id="cy"></main>
+
+
+  <aside id="side-panel">
+    <div id="event-info">Select event</div>
+    <div id="prediction">Prediction: -</div>
+  </aside>
+
+
+  <script type="module" src="../lab/labMain.lab.js"></script>
+</body>
+</html>
