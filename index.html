@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saureltia-layer</title>
+
+  <link rel="stylesheet" href="./style.lab.css" />
+  <link rel="icon" href="data:," />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+</head>
+<body>
+  <header id="lab-header">
+  <div id="lab-title-drag-bar">
+    <h1 id="lab-title">Saureltia-layer</h1>
+    <div id="global-search-box">
+      <input
+        id="global-search-input"
+        type="text"
+        placeholder="통합 검색... group, layer, event, pattern"
+        autocomplete="off"
+      />
+      <div id="global-related-keywords"></div>
+      <div id="global-search-results" class="hidden"></div>
+    </div>
+  </div>
+
+  <div id="global-hub-panel" class="hidden">
+    <div id="global-hub-head">
+      <span>GLOBAL HUB</span>
+      <button id="btn-close-global-hub" type="button">닫기</button>
+    </div>
+
+    <div id="global-hub-body">
+      <div id="global-hub-search-slot"></div>
+      <div id="global-hub-related-slot"></div>
+      <div id="global-hub-results-slot"></div>
+    </div>
+  </div>
+
+    <div id="info-panel" class="collapsed">
+      <div class="info-note-title">LAB 메모</div>
+      <div id="debug-note-body">
+        모드: -<br>
+        패턴: -<br>
+        관계 태그: -<br>
+        이벤트: -<br>
+        탐색 깊이: 0
+      </div>
+    </div>
+  </header>
+
+  <div id="controls">
+<div id="controls-layer">
+  <div id="layer-summary-box">
+    <div class="group-summary-title">LAYER</div>
+    <div class="group-summary-body">
+      <span id="layer-summary-count">참조 0</span>
+      <button id="btn-open-layer-panel">OPEN</button>
+    </div>
+  </div>
+</div>
+
+  <div id="controls-core">
+    <div class="control-group-wrapper">
+      <div class="control-group-label">RUN</div>
+      <div class="control-group control-group-run">
+        <button id="btn-open-timeline-explorer">타임라인 재생</button>
+        <button id="btn-event">이벤트 생성</button>
+        <button id="btn-relayout">레이아웃 재정렬</button>
+      </div>
+    </div>
+
+    <div class="control-group-wrapper">
+      <div class="control-group-label">NAV</div>
+<div class="control-group control-group-nav">
+  <button id="btn-back">Back</button>
+  <button id="btn-open-pattern-link-explorer">패턴 링크</button>
+  <button id="btn-add-variable">변수 설정</button>
+</div>
+    </div>
+
+    <div class="control-group-wrapper">
+      <div class="control-group-label">SYSTEM</div>
+      <div class="control-group control-group-system">
+        <button id="btn-reset-lab">LAB 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="controls-group">
+    <div id="group-summary-box">
+      <div class="group-summary-title">GROUP</div>
+      <div class="group-summary-body">
+        <span id="group-summary-count">참조 0</span>
+        <button id="btn-open-group-panel">OPEN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div id="lab-layout">
+    <aside id="left-panel" class="left-panel collapsed">
+      <div class="left-panel-header">
+  <button id="left-panel-toggle" type="button">▶</button>
+
+  <div id="left-panel-mini">
+    <div class="left-mini-line">
+      <span class="left-mini-label">G</span>
+      <span id="left-mini-group">-</span>
+    </div>
+    <div class="left-mini-line">
+      <span class="left-mini-label">M</span>
+      <span id="left-mini-mode">-</span>
+    </div>
+  </div>
+
+  <button id="btn-close-left-panel" type="button">X</button>
+</div>
+
+      <div class="left-panel-body">
+        <div class="left-section">
+          <button id="btn-feedback-good">피드백 +</button>
+          <button id="btn-feedback-bad">피드백 -</button>
+        </div>
+
+        <div class="left-section" id="mode-section">
+  <b>Mode</b>
+
+  <div id="mode-current-box">
+    <div class="mode-current-label">CURRENT</div>
+    <div id="mode-current-value">explore</div>
+  </div>
+
+  <div id="mode-container"></div>
+
+  <div id="mode-description-box">
+    <div class="mode-current-label">INFO</div>
+    <div id="mode-description">
+      전체 그래프를 기준으로 탐색합니다.
+    </div>
+  </div>
+</div>
+
+        <div class="left-section" id="layer-section">
+  <div id="layer-section-head">
+    <b>LAYER</b>
+    <button id="btn-layer-delete-mode">Layer 삭제하기</button>
+  </div>
+
+  <div id="layer-current-box">
+    <div class="layer-label">CURRENT</div>
+    <div id="layer-current-value">기본 그래프</div>
+  </div>
+
+  <div id="layer-actions">
+    <button id="btn-layer-save">임시 저장</button>
+    <button id="btn-layer-clear">초기화</button>
+  </div>
+
+  <div id="layer-list-box">
+    <div class="layer-label">SAVED</div>
+    <div id="layer-container"></div>
+  </div>
+
+  <div id="layer-meta-box">
+  <div class="layer-label">INFO</div>
+
+  <div class="layer-meta-row">
+    <div class="layer-meta-title">메모</div>
+    <textarea id="layer-memo-input" placeholder="Layer 메모"></textarea>
+  </div>
+
+  <div class="layer-meta-row">
+    <div class="layer-meta-title">설명</div>
+    <textarea id="layer-description-input" placeholder="Layer 설명"></textarea>
+  </div>
+
+  <div class="layer-meta-actions">
+    <button id="btn-layer-meta-save">메모 저장</button>
+  <button id="btn-layer-register-pattern">Pattern 등록</button>
+  </div>
+</div>
+</div>
+
+      </div>
+    </aside>
+
+    <main id="graph-panel">
+  <div id="pattern-page">
+    <div id="focus-header">
+      <span id="focus-pattern">패턴: -</span>
+      <span id="focus-relation">관계 태그: -</span>
+      <span id="focus-event">이벤트: -</span>
+    </div>
+
+    <div id="prediction"></div>
+    <div id="cy"></div>
+  </div>
+
+<div id="pattern-floating-actions" class="hidden">
+  <button id="btn-pattern-compact-toggle">Pattern Explorer</button>
+  <button id="btn-pattern-apply-toggle">현재 pattern 적용</button>
+  <button id="btn-pattern-create-layer">레이어 생성하기</button>
+  <button id="btn-pattern-register-group">GROUP 등록</button>
+  <button id="btn-pattern-promote-group">통합 승격</button>
+  <button id="btn-close-pattern-page">닫기</button>
+</div>
+
+<div id="layer-explorer-full" class="hidden">
+  <div id="layer-explorer-full-home">
+    <div id="layer-explorer-full-home-head">
+      <div class="layer-explorer-full-title">Layer Explorer</div>
+    </div>
+
+    <div id="layer-explorer-full-home-info">
+      Layer Explorer는 저장된 Layer를 확인 상태와 시간 기준으로 재분류해 보는 전용 허브입니다.
+    </div>
+
+    <div id="layer-explorer-full-home-actions">
+      <button id="btn-layer-main-tab-status" type="button" class="layer-full-main-btn active">확인별</button>
+      <button id="btn-layer-main-tab-time" type="button" class="layer-full-main-btn">시간별</button>
+      <button id="btn-layer-main-tab-set" type="button" class="layer-full-main-btn">집합</button>
+      <button id="btn-close-layer-explorer-full" type="button">닫기</button>
+    </div>
+  </div>
+
+  <div id="layer-explorer-full-view" class="hidden">
+    <div id="layer-explorer-full-view-head">
+      <div class="layer-explorer-full-title">Layer Explorer</div>
+      <div class="layer-explorer-full-view-actions">
+        <button id="btn-layer-full-back" type="button">Back</button>
+      </div>
+    </div>
+
+    <div id="layer-explorer-full-info">
+      <div class="layer-full-info-row"><b>전체</b>: <span id="layer-full-total-count">0</span></div>
+      <div class="layer-full-info-row"><b>LOADED</b>: <span id="layer-full-approved-count">0</span></div>
+      <div class="layer-full-info-row"><b>HOLD</b>: <span id="layer-full-holding-count">0</span></div>
+      <div class="layer-full-info-row"><b>NEW</b>: <span id="layer-full-stored-count">0</span></div>
+    </div>
+
+    <div id="layer-explorer-full-subview"></div>
+  </div>
+</div>
+
+</main>
+
+<div id="layer-set-create-modal" class="hidden">
+  <div class="layer-set-create-modal-box">
+    <div class="layer-set-create-modal-title">집합 만들기</div>
+    <div id="layer-set-create-modal-message" class="layer-set-create-modal-message">
+      "집합 A"을 생성하시겠습니까?
+    </div>
+
+    <div class="layer-set-create-modal-actions">
+      <button id="btn-layer-set-create-cancel" type="button">취소</button>
+      <button id="btn-layer-set-create-confirm" type="button">생성</button>
+    </div>
+  </div>
+</div>
+
+<!--
+<div id="pattern-link-page" class="hidden">
+  <aside id="pattern-link-left">
+    <div class="panel-head">
+      <span>Pattern Link</span>
+      <button id="btn-close-pattern-link-page">닫기</button>
+    </div>
+
+    <div id="pattern-link-left-body">
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">WORK</div>
+        <button id="btn-plp-hide-node">Nodes 가리기</button>
+        <button id="btn-plp-hide-edge">Edges 가리기</button>
+        <button id="btn-plp-temp-edge">Temp Edge</button>
+        <button id="btn-plp-reset-work">Reset Work</button>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">LAYOUT</div>
+        <button id="btn-plp-relayout-default">Default</button>
+        <button id="btn-plp-relayout-time">Time</button>
+        <button id="btn-plp-relayout-focus">Focus</button>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">STATE</div>
+        <div id="pattern-link-workspace-status"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main id="pattern-link-center">
+    <div id="pattern-link-focus-header">
+      <span id="pattern-link-focus-pattern">패턴: -</span>
+      <span id="pattern-link-focus-group">그룹: -</span>
+      <span id="pattern-link-focus-event">이벤트: -</span>
+    </div>
+
+    <div id="pattern-link-cy"></div>
+  </main>
+
+  <aside id="pattern-link-right">
+    <div class="panel-head">
+      <span>Detail</span>
+    </div>
+    <div id="pattern-link-detail-body"></div>
+  </aside>
+</div>
+-->
+<aside id="right-panel">
+  <div id="right-panel-network" class="right-panel-view">
+    <div class="panel-head">
+      <span>Detail</span>
+      <button id="btn-right-full">Full</button>
+    </div>
+
+    <div id="detail-section">
+      <div id="pattern-detail"></div>
+    </div>
+
+    <div id="log-section">
+      <div class="panel-title">LOG</div>
+      <div id="log-body"></div>
+    </div>
+  </div>
+
+  <div id="right-panel-variable" class="right-panel-view hidden">
+  <div class="panel-head">
+    <span>변수 추가</span>
+    <button id="btn-close-variable-panel">닫기</button>
+  </div>
+
+  <div id="variable-panel-body">
+    <div class="variable-section">
+      <div class="panel-title">FIELD</div>
+      <div id="condition-field-box" class="variable-chip-row">
+        <button class="condition-chip">build</button>
+        <button class="condition-chip">build-material</button>
+        <button class="condition-chip">finance</button>
+      </div>
+    </div>
+
+    <div class="variable-section">
+      <div class="panel-title">TAG</div>
+      <div id="condition-tag-box" class="variable-chip-row">
+        <button class="condition-chip">rot-high</button>
+        <button class="condition-chip">cap-micro</button>
+        <button class="condition-chip">var-explosive</button>
+      </div>
+    </div>
+
+    <div class="variable-section">
+      <div class="panel-title">VARIABLE</div>
+
+      <div class="variable-input-row">
+        <label for="input-rot-min">ROT ≥</label>
+        <input id="input-rot-min" type="number" placeholder="200" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-cap-max">CAP ≤</label>
+        <input id="input-cap-max" type="number" placeholder="50" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-var-min">VAR ≥</label>
+        <input id="input-var-min" type="number" placeholder="100" />
+      </div>
+
+      <div class="variable-actions">
+        <button id="btn-apply-layer-filter">조건 적용</button>
+        <button id="btn-reset-layer-filter">조건 초기화</button>
+      </div>
+
+      <div class="variable-actions">
+        <button id="btn-filter-peak">PEAK</button>
+        <button id="btn-filter-core">CORE+</button>
+        <button id="btn-filter-reset">RESET</button>
+      </div>
+
+      <div class="variable-actions">
+        <button id="btn-open-filter-rank-explorer">Filter Rank</button>
+      </div>
+    </div>
+
+    <div class="variable-section">
+      <div class="panel-title">INFO</div>
+      <div id="variable-panel-info">
+        변수 설정 패널
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="right-panel-event-editor" class="right-panel-view hidden">
+  <div class="panel-head">
+    <span>이벤트 생성</span>
+    <button id="btn-close-event-editor">닫기</button>
+  </div>
+
+  <div id="event-editor-body"></div>
+</div>
+</aside>
+
+  </div>
+
+<div id="group-panel" class="group-panel hidden">
+  <div class="group-panel-header">
+    <span>Group Explorer</span>
+    <button id="btn-close-group-panel">X</button>
+  </div>
+
+ <div id="group-panel-status">
+  <div class="group-panel-status-row">
+    <span>ON</span>
+    <b id="group-explorer-on-count">0</b>
+  </div>
+
+  <div class="group-panel-status-row">
+    <span>PREVIEW</span>
+    <b id="group-explorer-preview-count">0</b>
+  </div>
+
+  <div class="group-panel-status-row">
+    <button id="btn-group-base" type="button">BASE</button>
+  </div>
+</div>
+
+<div id="group-panel-actions">
+  <button id="btn-group-clear-preview" type="button">PREVIEW CLEAR</button>
+  <button id="btn-group-clear-on" type="button">ON CLEAR</button>
+  <button id="btn-group-clear-base" type="button">BASE CLEAR</button>
+  <button id="btn-open-relation-explorer-from-group" type="button">Relation</button>
+  <button id="btn-open-group-explorer-full" type="button">Full</button>
+  <button id="btn-group-promote-merge" type="button">통합 승격</button>
+</div>
+
+  <div id="group-panel-body"></div>
+</div>
+
+<button id="group-explorer-compact-minimized" class="group-explorer-compact-minimized hidden" type="button">
+  GROUP PANEL
+</button>
+
+<div id="group-explorer-full" class="group-explorer-full hidden">
+
+  <!-- HOME -->
+  <div id="group-explorer-full-home">
+    <div id="group-explorer-full-home-head">
+      <div>
+        <div class="group-explorer-full-kicker">GROUP</div>
+        <div class="group-explorer-full-title">Group Explorer Full</div>
+      </div>
+
+<div class="group-explorer-full-head-actions">
+  <button id="btn-minimize-group-explorer-full" type="button">최소화</button>
+  <button id="btn-close-group-explorer-full" type="button">닫기</button>
+</div>
+
+    </div>
+
+    <div id="group-explorer-full-summary">
+      <div class="group-full-summary-card">
+        <span>전체</span>
+        <b id="group-full-total-count">0</b>
+      </div>
+
+      <div class="group-full-summary-card">
+        <span>ON</span>
+        <b id="group-full-on-count">0</b>
+      </div>
+
+      <div class="group-full-summary-card">
+        <span>PREVIEW</span>
+        <b id="group-full-preview-count">0</b>
+      </div>
+
+      <div class="group-full-summary-card">
+        <span>BASE</span>
+        <b id="group-full-base-name">-</b>
+      </div>
+
+      <div class="group-full-summary-card">
+        <span>오염 의심</span>
+        <b id="group-full-contaminated-count">0</b>
+      </div>
+
+      <div class="group-full-summary-card">
+        <span>고순도</span>
+        <b id="group-full-clean-count">0</b>
+      </div>
+    </div>
+
+    <div id="group-explorer-full-home-info">
+      Compact Group Explorer는 빠른 조작 패널이고, Group Explorer Full은 Group을 이론 단위로 분석, 비교, 정렬, 승격하기 위한 전용 작업실입니다.
+    </div>
+
+    <div id="group-explorer-full-home-actions">
+      <button id="btn-group-full-tab-status" type="button" class="group-full-main-btn active">
+        상태별
+      </button>
+      <button id="btn-group-full-tab-theory" type="button" class="group-full-main-btn">
+        이론
+      </button>
+      <button id="btn-group-full-tab-structure" type="button" class="group-full-main-btn">
+        구조
+      </button>
+      <button id="btn-group-full-tab-reference" type="button" class="group-full-main-btn">
+        참조
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW -->
+  <div id="group-explorer-full-view" class="hidden">
+    <div id="group-explorer-full-view-head">
+      <div>
+        <div class="group-explorer-full-kicker" id="group-full-current-view-label">STATUS</div>
+        <div class="group-explorer-full-title">Group Explorer Full</div>
+      </div>
+
+<div class="group-explorer-full-view-actions">
+  <button id="btn-group-full-back" type="button">Back</button>
+  <button id="btn-minimize-group-explorer-full-view" type="button">최소화</button>
+</div>
+
+    </div>
+
+<div id="group-explorer-full-toolbar">
+  <input
+    id="group-full-search-input"
+    type="text"
+    placeholder="Group 검색... id, 이름, 관계, tag, node"
+    autocomplete="off"
+  />
+
+  <select id="group-full-axis-select">
+    <option value="overall">OVERALL</option>
+    <option value="relation">RELATION</option>
+    <option value="signature">SIGNATURE</option>
+    <option value="purity">PURITY</option>
+    <option value="contamination">CONTAMINATION</option>
+    <option value="source-pattern">SOURCE PATTERN</option>
+    <option value="source-layer">SOURCE LAYER</option>
+    <option value="center-node">CENTER NODE</option>
+    <option value="reference-group">REFERENCE GROUP</option>
+    <option value="knowledge-circle">KNOWLEDGE CIRCLE</option>
+<option value="predictability">PREDICTABILITY</option>
+<option value="theory-level">THEORY LEVEL</option>
+  </select>
+
+  <select id="group-full-filter-select">
+    <option value="ALL">ALL</option>
+    <option value="BASE">BASE</option>
+    <option value="HIGH_PURITY">HIGH PURITY</option>
+    <option value="CONTAMINATED">CONTAMINATED</option>
+    <option value="LOW_CONFIDENCE">LOW CONFIDENCE</option>
+    <option value="MERGED">MERGED</option>
+    <option value="PATTERN">PATTERN</option>
+    <option value="LAYER">LAYER</option>
+    <option value="MANUAL">MANUAL</option>
+  </select>
+
+  <select id="group-full-sort-select">
+    <option value="name">이름순</option>
+    <option value="purity">순수성순</option>
+    <option value="contamination">오염도순</option>
+    <option value="importance">중요도순</option>
+    <option value="confidence">신뢰도순</option>
+    <option value="members">멤버 수</option>
+    <option value="edges">edge 수</option>
+    <option value="base-similarity">BASE 유사도순</option>
+  </select>
+</div>
+
+<div id="group-full-bucket-actions">
+  <select id="group-full-bucket-sort-select">
+    <option value="count">BUCKET COUNT</option>
+    <option value="purity">AVG PURITY</option>
+    <option value="contamination">AVG CONTAMINATION</option>
+    <option value="importance">AVG IMPORTANCE</option>
+    <option value="confidence">AVG CONFIDENCE</option>
+    <option value="label">LABEL</option>
+  </select>
+
+  <button id="btn-group-full-expand-buckets" type="button">EXPAND ALL</button>
+  <button id="btn-group-full-collapse-buckets" type="button">COLLAPSE ALL</button>
+</div>
+
+    <div id="group-full-related-keywords"></div>
+
+    <div id="group-explorer-full-subview"></div>
+  </div>
+</div>
+
+<button id="group-explorer-full-minimized" class="group-explorer-full-minimized hidden" type="button">
+  GROUP
+</button>
+
+<div id="layer-panel" class="group-panel hidden">
+  <div class="group-panel-header">
+    <span>Layer Explorer</span>
+    <button id="btn-close-layer-panel">X</button>
+  </div>
+
+<div class="layer-panel-actions">
+  <button id="btn-layer-promote-pattern">통합 승격</button>
+  <button id="btn-open-layer-explorer-full" type="button">Full</button>
+</div>
+<div id="layer-panel-body">
+  <div id="layer-explorer-container"></div>
+</div>
+
+</div>
+
+<div id="layer-delete-bar" class="hidden">
+  <button id="btn-layer-delete-confirm">삭제하기</button>
+</div>
+
+<div id="layer-delete-modal" class="hidden">
+  <div id="layer-delete-modal-box">
+    <div id="layer-delete-modal-title">"정말 삭제하시겠습니까? (이 작업은 취소할 수 없습니다.)"</div>
+    <div id="layer-delete-modal-list"></div>
+
+    <div id="layer-delete-modal-actions">
+      <button id="btn-layer-delete-cancel">취소</button>
+      <button id="btn-layer-delete-final">최종 삭제</button>
+    </div>
+  </div>
+</div>
+
+<div id="relation-empty-modal" class="hidden">
+  <div id="relation-empty-modal-box">
+    <div id="relation-empty-modal-head">
+      <span>RELATION</span>
+      <button id="btn-close-relation-empty-modal">닫기</button>
+    </div>
+
+    <div id="relation-empty-modal-body">
+      <div class="empty-state">
+        <b>부합하는 edge가 없습니다.</b><br>
+        현재 태그 조건에 맞는 relation edge가 없습니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="layer-delete-explorer" class="hidden">
+  <div id="layer-delete-explorer-box">
+    <div id="layer-delete-explorer-head">
+      <span>Layer Explorer</span>
+      <button id="btn-close-layer-delete-mode">닫기</button>
+    </div>
+
+    <div id="layer-delete-explorer-body"></div>
+  </div>
+</div>
+
+<div id="event-delete-modal" class="hidden">
+  <div id="event-delete-modal-box">
+    <div id="event-delete-modal-title">"정말 삭제하시겠습니까? (이 작업은 취소할 수 없습니다.)"</div>
+
+    <div id="event-delete-options">
+  <button id="btn-delete-select-all">전체 선택</button>
+  <button id="btn-delete-select-filtered">검색 결과 선택</button>
+  <button id="btn-delete-clear">전체 해제</button>
+</div>
+
+    <div id="event-delete-modal-list"></div>
+    <div id="event-delete-modal-actions">
+      <button id="btn-event-delete-cancel">취소</button>
+      <button id="btn-event-delete-final">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div id="timeline-explorer" class="hidden">
+  <div id="timeline-explorer-head">
+    <span>TIMELINE</span>
+    <button id="btn-close-timeline-explorer">닫기</button>
+  </div>
+
+  <div id="timeline-explorer-body">
+    <div class="timeline-explorer-row">
+      <button id="btn-play">재생</button>
+      <button id="btn-stop">정지</button>
+    </div>
+
+    <div class="timeline-explorer-row">
+  <button id="btn-step-backward">이전 이벤트</button>
+  <button id="btn-step-forward">다음 이벤트</button>
+</div>
+
+<div class="timeline-explorer-row">
+  <button id="btn-timeline-reset">처음으로</button>
+</div>
+
+
+    <div class="timeline-explorer-row">
+      <div id="timeline-index-box">0 / 0</div>
+    </div>
+
+    <div class="timeline-explorer-row">
+      <button id="btn-speed-down">-</button>
+      <div id="timeline-speed-box">1.0x</div>
+      <button id="btn-speed-up">+</button>
+    </div>
+
+    <div class="timeline-explorer-row">
+  <button id="btn-build-temp-relations">임시 관계도 생성</button>
+  <button id="btn-clear-temp-relations">임시 관계도 해제</button>
+</div>
+
+  </div>
+</div>
+<!--
+<div id="pattern-link-explorer" class="hidden">
+  <div id="pattern-link-explorer-head">
+    <span>Pattern Link Explorer</span>
+    <button id="btn-close-pattern-link-explorer">닫기</button>
+  </div>
+
+  <div id="pattern-link-explorer-body">
+    <div class="explorer-section">
+      <div class="explorer-title">가리기</div>
+      <button id="btn-pattern-hide-node">Nodes 가리기</button>
+      <button id="btn-pattern-hide-edge">Edges 가리기</button>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">현재 Layer 기준</div>
+      <button id="btn-pattern-hide-layer-nodes">Layer Nodes 전체 가리기</button>
+      <button id="btn-pattern-hide-layer-edges">Layer Edges 전체 가리기</button>
+    </div>
+
+    <div class="explorer-section">
+  <div class="explorer-title">임시 생성</div>
+  <button id="btn-pattern-temp-edge">Edge 임시 생성</button>
+  <button id="btn-pattern-temp-edge-undo">마지막 Edge 되돌리기</button>
+  <button id="btn-pattern-temp-edge-clear">임시 Edge 전체 제거</button>
+</div>
+
+    <div class="explorer-section">
+  <div class="explorer-title">정리</div>
+  <button id="btn-pattern-reset-visibility">Reset</button>
+
+  <button id="btn-pattern-relayout-default">ReLayout: Default</button>
+  <button id="btn-pattern-relayout-time">ReLayout: Time</button>
+  <button id="btn-pattern-relayout-focus">ReLayout: Focus</button>
+</div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">상태</div>
+      <div id="pattern-link-explorer-status">OFF</div>
+    </div>
+  </div>
+</div>
+-->
+<div id="pattern-link-page">
+  <aside id="pattern-link-left">
+    <div class="panel-head">
+      <span>Pattern Link</span>
+      <button id="btn-close-pattern-link-page">닫기</button>
+    </div>
+
+    <div id="pattern-link-left-body">
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">WORK</div>
+        <button id="btn-plp-hide-node">Nodes 가리기</button>
+        <button id="btn-plp-hide-edge">Edges 가리기</button>
+        <button id="btn-plp-temp-edge">Temp Edge</button>
+        <button id="btn-plp-dim">Dim Mode</button>
+        <button id="btn-plp-reset-work">Reset Work</button>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">LAYOUT</div>
+        <button id="btn-plp-relayout-default">Default</button>
+        <button id="btn-plp-relayout-time">Time</button>
+        <button id="btn-plp-relayout-focus">Focus</button>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">STATE</div>
+        <div id="pattern-link-workspace-status"></div>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">LAYER LOAD</div>
+        <select id="pattern-link-layer-select"></select>
+        <button id="btn-plp-load-layer">Load Layer</button>
+        <button id="btn-plp-unload-layer">Unload Layer</button>
+        <button id="btn-plp-show-all">Show All</button>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">SAVE WORKSPACE</div>
+        <input id="input-plp-layer-name" type="text" placeholder="새 Layer 이름" />
+        <button id="btn-plp-save-workspace-layer">Save as Layer</button>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">COMPARE</div>
+        <div id="pattern-link-compare-box"></div>
+      </div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">INSPECT</div>
+        <div id="pattern-link-inspect-box"></div>
+      </div>
+
+<div class="pattern-link-section">
+  <div class="pattern-link-section-title">GROUP</div>
+  <div id="pattern-link-current-group-box" class="plp-current-box">
+    PL Group: -
+  </div>
+</div>
+
+      <div class="pattern-link-section">
+        <div class="pattern-link-section-title">APPLY</div>
+        <button id="btn-plp-apply-to-main">Apply to Main Graph</button>
+      </div>
+    </div>
+  </aside>
+
+  <main id="pattern-link-center">
+    <div id="pattern-link-focus-header">
+      <div id="pattern-link-focus-pattern">패턴: -</div>
+      <div id="pattern-link-focus-group">그룹: -</div>
+      <div id="pattern-link-focus-event">이벤트: -</div>
+    </div>
+
+    <div id="pattern-link-cy"></div>
+  </main>
+
+  <aside id="pattern-link-right">
+    <div class="panel-head">
+      <span>Detail</span>
+    </div>
+    <div id="pattern-link-detail-body"></div>
+  </aside>
+</div>
+
+<div id="command-palette" class="hidden">
+  <div id="command-palette-box">
+    <div id="command-palette-head">
+      <span>COMMAND</span>
+      <button id="btn-close-command-palette">닫기</button>
+    </div>
+
+    <div id="command-palette-body">
+      <input
+        id="command-palette-input"
+        type="text"
+        placeholder="명령 검색... (log, timeline, event, pattern)"
+        autocomplete="off"
+      />
+
+      <div id="command-palette-results"></div>
+    </div>
+  </div>
+</div>
+
+<div id="log-explorer" class="hidden">
+  <div id="log-explorer-head">
+    <span>LOG</span>
+    <button id="btn-close-log-explorer">닫기</button>
+  </div>
+
+  <div id="log-explorer-body">
+    <div id="log-explorer-toolbar">
+      <div id="log-filter-row">
+        <button class="log-filter-btn active" data-log-scope="ALL">ALL</button>
+        <button class="log-filter-btn" data-log-scope="EVENT">EVENT</button>
+        <button class="log-filter-btn" data-log-scope="TIMELINE">TIMELINE</button>
+        <button class="log-filter-btn" data-log-scope="GROUP">GROUP</button>
+        <button class="log-filter-btn" data-log-scope="LAYER">LAYER</button>
+        <button class="log-filter-btn" data-log-scope="MODE">MODE</button>
+        <button class="log-filter-btn" data-log-scope="GRAPH">GRAPH</button>
+      </div>
+
+      <div id="log-search-row">
+        <input id="log-search-input" type="text" placeholder="로그 검색..." />
+        <button id="btn-log-show-recent">최근 20개</button>
+        <button id="btn-log-show-all">전체</button>
+      </div>
+    </div>
+
+    <div id="log-explorer-results"></div>
+
+    <div id="log-explorer-detail">
+  <div id="log-explorer-detail-head">DETAIL</div>
+  <div id="log-explorer-detail-body">
+    <div class="empty-state">로그를 선택하면 상세 정보가 표시됩니다.</div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<!--*조작 도구 아님. 그래프가 살아 있든 죽어 있든, 다운됐든, 숨겨졌든 상관없이 전부 담긴 정의 집합*
+ 즉, 포커스 이동형 허브 아님. 상태 변경용 허브 아님. 현재 뷰 반영용 허브 아님. 그냥 사전 / 아카이브 / 원본 목록.-->
+
+<div id="all-data-explorer" class="hidden">
+  <div id="all-data-explorer-head">
+    <span>ALL DATA</span>
+    <button id="btn-close-all-data-explorer">닫기</button>
+  </div>
+
+  <div id="all-data-explorer-body">
+    <div id="all-data-toolbar">
+      <div id="all-data-filter-row">
+        <button class="all-data-filter-btn active" data-data-scope="ALL">ALL</button>
+        <button class="all-data-filter-btn" data-data-scope="EVENT">EVENT</button>
+        <button class="all-data-filter-btn" data-data-scope="GROUP">GROUP</button>
+        <button class="all-data-filter-btn" data-data-scope="PATTERN">PATTERN</button>
+        <button class="all-data-filter-btn" data-data-scope="LAYER">LAYER</button>
+      </div>
+
+      <div id="all-data-search-row">
+        <input id="all-data-search-input" type="text" placeholder="정의 검색..." />
+        <select id="all-data-sort-select">
+          <option value="name">이름순</option>
+          <option value="scope">유형순</option>
+          <option value="importance">중요도순</option>
+          <option value="filter-grade">Filter Grade순</option>
+<option value="filter-multiplier">Filter Multiplier순</option>
+          <option value="id">ID순</option>
+        </select>
+        <button id="btn-event-delete-mode">EVENT 삭제하기</button>
+      </div>
+    </div>
+
+    <div id="all-data-main">
+      <div id="all-data-list"></div>
+
+      <div id="all-data-detail">
+        <div id="all-data-detail-head">DETAIL</div>
+        <div id="all-data-detail-body">
+          <div class="empty-state">정의를 선택하면 상세 정보가 표시됩니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="event-delete-bar" class="hidden">
+  <button id="btn-event-delete-confirm">선택 삭제</button>
+  <button id="btn-close-event-delete-mode">닫기</button>
+</div>
+
+  </div>
+</div>
+
+<div id="pattern-layer-explorer" class="hidden">
+  <div id="pattern-layer-explorer-box">
+    <div id="pattern-layer-explorer-head">
+      <span>Pattern → Layer</span>
+      <button id="btn-close-pattern-layer-explorer">닫기</button>
+    </div>
+
+    <div id="pattern-layer-explorer-body">
+      <div id="pattern-layer-menu-view">
+        <div class="pattern-layer-option">
+          <div class="pattern-layer-option-title">전체 노드</div>
+          <div class="pattern-layer-option-sub">패턴에 포함된 모든 노드로 레이어 생성</div>
+          <button id="btn-pattern-layer-all">생성</button>
+        </div>
+
+        <div class="pattern-layer-option">
+          <div class="pattern-layer-option-title">밀도 높은 노드</div>
+          <div class="pattern-layer-option-sub">연결 밀도가 높은 노드만 추려 레이어 생성</div>
+          <button id="btn-pattern-layer-dense">생성</button>
+        </div>
+
+        <div class="pattern-layer-option">
+          <div class="pattern-layer-option-title">그룹별 분할</div>
+          <div class="pattern-layer-option-sub">패턴 내부 그룹 단위로 레이어를 나눠 생성</div>
+          <button id="btn-pattern-layer-groups">생성</button>
+        </div>
+
+        <div class="pattern-layer-option">
+          <div class="pattern-layer-option-title">커스텀</div>
+          <div class="pattern-layer-option-sub">직접 조건을 정해서 레이어 생성</div>
+          <button id="btn-pattern-layer-custom">설정</button>
+        </div>
+
+        <div id="pattern-layer-preview" class="pattern-layer-preview-box"></div>
+      </div>
+
+      <div id="pattern-layer-custom-view" class="hidden">
+        <div class="pattern-layer-custom-grid">
+          <div class="variable-input-row">
+            <label for="input-pattern-layer-name">이름</label>
+            <input id="input-pattern-layer-name" type="text" placeholder="Layer 이름" />
+          </div>
+
+          <div class="variable-input-row">
+            <label for="input-pattern-rot-min">ROT ≥</label>
+            <input id="input-pattern-rot-min" type="number" placeholder="0" />
+          </div>
+
+          <div class="variable-input-row">
+            <label for="input-pattern-cap-max">CAP ≤</label>
+            <input id="input-pattern-cap-max" type="number" placeholder="-" />
+          </div>
+
+          <div class="variable-input-row">
+            <label for="input-pattern-var-min">VAR ≥</label>
+            <input id="input-pattern-var-min" type="number" placeholder="0" />
+          </div>
+
+          <div class="variable-input-row">
+            <label for="input-pattern-node-limit">최대 노드 수</label>
+            <input id="input-pattern-node-limit" type="number" placeholder="전체" />
+          </div>
+        </div>
+
+        <div class="pattern-layer-custom-actions">
+          <button id="btn-pattern-layer-custom-back">뒤로</button>
+          <button id="btn-pattern-layer-custom-create">생성</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="layer-pattern-explorer" class="hidden">
+  <div id="layer-pattern-explorer-box">
+    <div id="layer-pattern-explorer-head">
+      <span>Layer → Pattern 등록</span>
+      <button id="btn-close-layer-pattern-explorer">닫기</button>
+    </div>
+
+    <div id="layer-pattern-explorer-body">
+
+  <!-- MENU VIEW -->
+  <div id="layer-pattern-menu-view">
+
+    <div class="pattern-layer-option">
+      <div class="pattern-layer-option-title">전체 Layer 등록</div>
+      <div class="pattern-layer-option-sub">현재 Layer의 모든 노드를 Pattern으로 등록</div>
+      <button id="btn-layer-pattern-all">등록</button>
+    </div>
+
+    <div class="pattern-layer-option">
+      <div class="pattern-layer-option-title">필터 기반 등록</div>
+      <div class="pattern-layer-option-sub">현재 필터 조건 기반 Pattern 생성</div>
+      <button id="btn-layer-pattern-filtered">등록</button>
+    </div>
+
+    <div class="pattern-layer-option">
+      <div class="pattern-layer-option-title">커스텀</div>
+      <div class="pattern-layer-option-sub">직접 조건을 설정하여 Pattern 생성</div>
+      <button id="btn-layer-pattern-custom">설정</button>
+    </div>
+
+  </div>
+
+
+  <!-- CUSTOM VIEW -->
+  <div id="layer-pattern-custom-view" class="hidden">
+
+    <div class="pattern-layer-custom-grid">
+
+      <div class="variable-input-row">
+        <label for="input-layer-pattern-id">Pattern ID</label>
+        <input id="input-layer-pattern-id" type="text" placeholder="자동 생성 가능" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-layer-pattern-type">Type</label>
+        <input id="input-layer-pattern-type" type="text" placeholder="CUSTOM" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-layer-pattern-name">이름</label>
+        <input id="input-layer-pattern-name" type="text" placeholder="Pattern 이름" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-layer-pattern-prob">Probability</label>
+        <input id="input-layer-pattern-prob" type="number" step="0.01" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-layer-pattern-score">Score</label>
+        <input id="input-layer-pattern-score" type="number" step="0.01" />
+      </div>
+
+      <div class="variable-input-row">
+        <label for="input-layer-pattern-memo">메모</label>
+        <textarea id="input-layer-pattern-memo"></textarea>
+      </div>
+
+    </div>
+
+    <div class="pattern-layer-custom-actions">
+      <button id="btn-layer-pattern-custom-back">뒤로</button>
+      <button id="btn-layer-pattern-custom-create">등록</button>
+    </div>
+
+  </div>
+
+  <!-- PREVIEW -->
+  <div id="layer-pattern-preview"></div>
+
+</div>
+  </div>
+</div>
+
+<!-- Pattern Link Explorer -->
+<div id="pattern-link-explorer" class="hidden">
+  <div id="pattern-link-explorer-head">
+    <span>Pattern Link Explorer</span>
+    <button id="btn-close-pattern-link-explorer">닫기</button>
+  </div>
+
+  <div id="pattern-link-explorer-body">
+
+    <div class="explorer-section">
+      <div class="explorer-title">TYPE</div>
+      <div class="explorer-button-stack">
+        <button id="btn-pattern-hide-element">요소 가리기</button>
+      </div>
+
+      <div id="pattern-hide-element-box" class="explorer-subbox hidden">
+        <div class="explorer-subtitle">요소 가리기</div>
+        <div class="explorer-button-stack">
+          <button id="btn-pattern-hide-node">Nodes 가리기</button>
+          <button id="btn-pattern-hide-edge">Edges 가리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">LAYER</div>
+      <div class="explorer-button-stack">
+        <button id="btn-pattern-layer-hide">레이어</button>
+      </div>
+
+      <div id="pattern-layer-hide-box" class="explorer-subbox hidden">
+        <div class="explorer-subtitle">레이어</div>
+        <div class="explorer-button-stack">
+          <button id="btn-pattern-hide-layer-nodes">Layer Nodes 가리기</button>
+          <button id="btn-pattern-hide-layer-edges">Layer Edges 가리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">RELATION</div>
+      <div class="explorer-button-stack">
+        <button id="btn-pattern-relation-filter">관계 태그</button>
+      </div>
+
+      <div id="pattern-relation-filter-box" class="explorer-subbox hidden">
+        <div class="explorer-subtitle">관계 태그</div>
+        <div id="edge-relation-filter-bar" class="explorer-button-stack">
+<button class="pl-edge-filter-btn active" data-edge-filter="ALL" type="button">ALL</button>
+<button class="pl-edge-filter-btn" data-edge-filter="CAUSE" type="button">CAUSE</button>
+<button class="pl-edge-filter-btn" data-edge-filter="FOLLOWUP" type="button">FOLLOWUP</button>
+<button class="pl-edge-filter-btn" data-edge-filter="UNKNOWN" type="button">UNKNOWN</button>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">TEMP</div>
+      <div class="explorer-button-stack">
+        <button id="btn-pattern-temp-edge">Edge 임시 생성</button>
+        <button id="btn-pattern-temp-break">Chain 끊기</button>
+        <button id="btn-pattern-temp-undo">Undo</button>
+        <button id="btn-pattern-temp-backtrack">Backtrack</button>
+      </div>
+
+      <div id="pattern-temp-chain-preview" class="explorer-subinfo">
+        chain: -
+      </div>
+
+      <div id="pattern-temp-pattern-preview" class="explorer-subbox">
+        <div class="explorer-subtitle">패턴 업데이트 preview</div>
+        <div id="pattern-temp-pattern-preview-body" class="explorer-subinfo">
+          pattern: -
+        </div>
+      </div>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">ACTION</div>
+      <div class="explorer-button-stack">
+        <button id="btn-pattern-reset-visibility">Reset</button>
+        <button id="btn-pattern-relayout">ReLayout</button>
+      </div>
+    </div>
+
+    <div class="explorer-section explorer-status-section">
+      <div class="explorer-title">STATUS</div>
+      <div id="pattern-link-explorer-status">OFF</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="filter-grade-hover" class="hidden"></div>
+
+<div id="filter-rank-explorer" class="hidden">
+  <div id="filter-rank-explorer-head">
+    <span>FILTER RANK</span>
+    <button id="btn-close-filter-rank-explorer">닫기</button>
+  </div>
+
+<div id="filter-rank-explorer-toolbar">
+  <button id="btn-filter-rank-pass">PASS 중심</button>
+  <button id="btn-filter-rank-fail">FAIL 중심</button>
+  <button id="btn-filter-rank-basic">Basic</button>
+  <button id="btn-filter-rank-raw">Raw</button>
+  <button id="btn-filter-rank-layer-all">Layer(전체)</button>
+  <button id="btn-filter-rank-layer-active">Layer(선택)</button>
+  <button id="btn-filter-rank-layer-pass">Layer(PASS)</button>
+</div>
+
+  <div id="filter-rank-explorer-body"></div>
+</div>
+
+<div id="pattern-mini-explorer" class="hidden">
+  <div id="pattern-mini-explorer-head">
+    <span>Pattern Explorer</span>
+    <button id="btn-close-pattern-mini-explorer">닫기</button>
+  </div>
+
+  <div id="pattern-mini-explorer-body">
+    <div class="pattern-mini-explorer-actions">
+  <button id="btn-pattern-apply-toggle-mini">현재 pattern 적용</button>
+  <button id="btn-pattern-create-layer-mini">레이어 생성하기</button>
+  <button id="btn-pattern-register-group-mini">GROUP 등록</button>
+  <button id="btn-pattern-promote-group-mini">통합 승격</button>
+  <button id="btn-close-pattern-page">Pattern 닫기</button>
+</div>
+
+    <div id="pattern-mini-explorer-list"></div>
+  </div>
+</div>
+
+<div id="relation-explorer" class="hidden">
+  <div id="relation-explorer-head">
+    <span>RELATION EXPLORER</span>
+    <button id="btn-close-relation-explorer">닫기</button>
+  </div>
+
+  <div id="relation-explorer-body">
+    <div class="explorer-section">
+      <div class="explorer-title">TARGET</div>
+      <div id="relation-explorer-target" class="explorer-subinfo">group: -</div>
+      <div id="relation-explorer-summary" class="explorer-subinfo">node: 0 / edge: 0</div>
+    </div>
+
+    <div class="explorer-section">
+  <div class="explorer-title">ACTION</div>
+  <div class="explorer-button-stack">
+    <button id="btn-relation-make-layer">Layer 생성하기</button>
+    <button id="btn-relation-back">Back</button>
+    <button id="btn-reset-relation-focus">Reset</button>
+  </div>
+</div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">RELATION</div>
+      <div id="relation-edge-filter-bar" class="explorer-button-stack">
+        <button class="relation-edge-filter-btn active" data-relation-edge-filter="ALL" type="button">ALL</button>
+        <button class="relation-edge-filter-btn" data-relation-edge-filter="CAUSE" type="button">CAUSE</button>
+        <button class="relation-edge-filter-btn" data-relation-edge-filter="FOLLOWUP" type="button">FOLLOWUP</button>
+        <button class="relation-edge-filter-btn" data-relation-edge-filter="UNKNOWN" type="button">UNKNOWN</button>
+      </div>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">RELATED NODES</div>
+      <div id="relation-node-list" class="pl-compare-list"></div>
+    </div>
+
+    <div class="explorer-section">
+      <div class="explorer-title">RELATED EDGES</div>
+      <div id="relation-edge-list" class="pl-edge-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="layer-set-delete-modal" class="hidden">
+  <div class="layer-set-delete-modal-box">
+    <div class="layer-set-create-modal-title">집합 삭제</div>
+    <div id="layer-set-delete-modal-message" class="layer-set-create-modal-message">
+      삭제할 집합을 선택하세요.
+    </div>
+
+    <div class="layer-set-delete-toolbar">
+      <button id="btn-layer-set-delete-select-all" type="button">전체 선택</button>
+      <button id="btn-layer-set-delete-clear-all" type="button">전체 해제</button>
+    </div>
+
+    <div id="layer-set-delete-modal-list" class="layer-set-delete-modal-list">
+      <div class="empty-state">삭제할 집합 없음</div>
+    </div>
+
+    <div class="layer-set-create-modal-actions">
+      <button id="btn-layer-set-delete-cancel" type="button">취소</button>
+      <button id="btn-layer-set-delete-confirm" type="button">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./lab/labMain.lab.js"></script>
+

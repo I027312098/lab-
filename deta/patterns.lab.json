@@ -1,0 +1,12 @@
+[
+ {
+  "id":"p1",
+  "type":"CAUSAL_CHAIN",
+  "score":0.7
+ },
+ {
+  "id":"p2",
+  "type":"REVERSAL",
+  "score":0.6
+ }
+]
